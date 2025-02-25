@@ -24,6 +24,7 @@ const ChessTrainer = () => {
   } = useGame();
 
   const [boardWidth, setBoardWidth] = useState(Math.min(600, window.innerWidth - 384));
+  const [timeLeft, setTimeLeft] = useState(30); // 30 seconds for timed mode
 
   // Update board width on window resize
   useEffect(() => {
@@ -32,6 +33,36 @@ const ChessTrainer = () => {
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Timer logic for timed mode
+  useEffect(() => {
+    let timer;
+    if (settings.mode === 'timed' && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft(t => {
+          if (t <= 1) {
+            // Time's up - show results
+            clearInterval(timer);
+            return 0;
+          }
+          return t - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [settings.mode, timeLeft]);
+
+  // Reset timer when changing to timed mode
+  useEffect(() => {
+    if (settings.mode === 'timed') {
+      setTimeLeft(30);
+    }
+  }, [settings.mode]);
+
+  // Initialize game and target square on mount
+  useEffect(() => {
+    generateRandomSquare();
   }, []);
 
   const highlightVariants = {
@@ -72,20 +103,65 @@ const ChessTrainer = () => {
     generateRandomSquare();
   };
 
-  // Timer logic for timed mode
-  useEffect(() => {
-    if (settings.mode === 'timed' && settings.timeLimit > 0) {
-      const timer = setInterval(() => {
-        setSettings(s => ({ ...s, timeLimit: s.timeLimit - 1 }));
-      }, 1000);
-      return () => clearInterval(timer);
+  const renderModeContent = () => {
+    switch (settings.mode) {
+      case 'squareToCoord':
+        return (
+          <>
+            <h2 className="text-xl font-semibold mb-4">What is this square's coordinate?</h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                placeholder="Enter coordinate (e.g., e4)"
+                className="w-full p-3 bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              />
+              <button
+                onClick={() => handleSubmit()}
+                className="w-full bg-blue-600 p-3 rounded-lg hover:bg-blue-500 transition-colors font-medium"
+              >
+                Submit
+              </button>
+            </div>
+          </>
+        );
+      
+      case 'coordToSquare':
+        return (
+          <h2 className="text-xl font-semibold mb-4">Click square: <span className="text-blue-400">{targetSquare}</span></h2>
+        );
+      
+      case 'timed':
+        return (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Time left: <span className="text-blue-400">{timeLeft}s</span></h2>
+              <span className="text-sm">Score: {stats.correct}</span>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                placeholder="Enter coordinate (e.g., e4)"
+                className="w-full p-3 bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              />
+            </div>
+          </>
+        );
+      
+      case 'blindfold':
+        return (
+          <>
+            <h2 className="text-xl font-semibold mb-4">Find square: <span className="text-blue-400">{targetSquare}</span></h2>
+            <p className="text-sm text-gray-400 mb-4">Try to visualize the board without visual aids</p>
+          </>
+        );
     }
-  }, [settings.mode, settings.timeLimit]);
-
-  // Initialize game and target square on mount
-  useEffect(() => {
-    generateRandomSquare();
-  }, []);
+  };
 
   return (
     <div className="fixed inset-0 bg-gray-900 text-gray-100 flex flex-col">
@@ -102,21 +178,22 @@ const ChessTrainer = () => {
         <div className="flex-1 p-4 flex items-center justify-center">
           <div className="relative w-full max-w-[calc(100vh-8rem)] aspect-square">
             <Chessboard
-              position={game.fen()}
+              position="8/8/8/8/8/8/8/8" // Empty board
               boardWidth={boardWidth}
               customSquareStyles={{
-                [targetSquare]: {
+                [targetSquare]: settings.mode !== 'coordToSquare' ? {
                   backgroundColor: 'rgba(255, 235, 59, 0.4)',
-                },
+                } : {},
               }}
               boardOrientation={settings.isBlackPerspective ? 'black' : 'white'}
               showBoardNotation={settings.showCoordinates}
               customBoardStyle={{
                 borderRadius: '8px',
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                opacity: settings.mode === 'blindfold' ? 0.1 : 1,
               }}
               onSquareClick={(square) => {
-                if (settings.mode === 'coordToSquare') {
+                if (settings.mode === 'coordToSquare' || settings.mode === 'blindfold') {
                   handleSubmit(square);
                 }
               }}
@@ -146,14 +223,19 @@ const ChessTrainer = () => {
             </label>
           </div>
 
-          {/* Training Modes */}
+          {/* Mode Selection */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4">Training Mode</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
               {['squareToCoord', 'coordToSquare', 'timed', 'blindfold'].map(mode => (
                 <button
                   key={mode}
-                  onClick={() => setSettings(s => ({ ...s, mode }))}
+                  onClick={() => {
+                    setSettings(s => ({ ...s, mode }));
+                    setStats({ correct: 0, incorrect: 0 });
+                    generateRandomSquare();
+                    if (mode === 'timed') setTimeLeft(30);
+                  }}
                   className={`p-3 rounded-lg text-sm font-medium ${
                     settings.mode === mode
                       ? 'bg-blue-600 text-white'
@@ -168,43 +250,24 @@ const ChessTrainer = () => {
             </div>
           </div>
 
-          {/* Input Section */}
-          <div className="mt-auto space-y-6">
-            <div className="space-y-3">
-              <input
-                type="text"
-                value={userAnswer}
-                onChange={(e) => setUserAnswer(e.target.value)}
-                placeholder="Enter coordinate (e.g., e4)"
-                className="w-full p-3 bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSubmit();
-                  }
-                }}
-              />
-              <button
-                onClick={() => handleSubmit()}
-                className="w-full bg-blue-600 p-3 rounded-lg hover:bg-blue-500 transition-colors font-medium"
-              >
-                Submit
-              </button>
-            </div>
+          {/* Mode Specific Content */}
+          <div className="mt-6">
+            {renderModeContent()}
+          </div>
 
-            {/* Progress */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm font-medium">
-                <span>Progress</span>
-                <span>{((stats.correct / (stats.correct + stats.incorrect)) * 100 || 0).toFixed(1)}%</span>
-              </div>
-              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-blue-500"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(stats.correct / (stats.correct + stats.incorrect)) * 100 || 0}%` }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
+          {/* Progress */}
+          <div className="mt-auto pt-6 space-y-2">
+            <div className="flex justify-between text-sm font-medium">
+              <span>Progress</span>
+              <span>{((stats.correct / (stats.correct + stats.incorrect)) * 100 || 0).toFixed(1)}%</span>
+            </div>
+            <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-blue-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${(stats.correct / (stats.correct + stats.incorrect)) * 100 || 0}%` }}
+                transition={{ duration: 0.3 }}
+              />
             </div>
           </div>
         </div>
@@ -212,4 +275,5 @@ const ChessTrainer = () => {
     </div>
   );
 };
+
 export default ChessTrainer;
