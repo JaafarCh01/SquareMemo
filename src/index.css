@@ -71,3 +71,11 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+@keyframes fadeOut {
+  from { opacity: 0; }
+  to { opacity: 0.5; }
+}
+.animate-fadeOut {
+  animation: fadeOut 3s forwards;
+}
