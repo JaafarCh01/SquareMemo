@@ -30,10 +30,10 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div className="flex flex-col h-full">
         {/* Navigation */}
-        <nav className="bg-white shadow-lg sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4">
+        <nav className="w-full bg-white shadow-lg z-10 flex-none">
+          <div className="w-full max-w-[2000px] mx-auto px-6">
             <div className="flex justify-between h-16">
               <div className="flex items-center space-x-4">
                 <Link to="/" className="flex items-center">
@@ -73,13 +73,15 @@ function App() {
           </div>
         </nav>
 
-        {/* Routes */}
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/train" element={<TrainingPage />} />
-          <Route path="/progress" element={<ProgressPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col min-h-0 bg-gray-50">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/train" element={<TrainingPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </main>
       </div>
     </Router>
   )

@@ -26,9 +26,9 @@ const ModeSelector = () => {
   const { currentMode, setMode, currentLevel, getLevelProgress } = useGameStore();
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6 text-center">Select Training Mode</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="w-full px-6">
+      <h2 className="text-2xl font-bold mb-6">Select Training Mode</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {modes.map((mode) => {
           const isLocked = currentLevel < mode.requiredLevel;
           const progress = getLevelProgress(mode.requiredLevel - 1);
@@ -38,24 +38,24 @@ const ModeSelector = () => {
               key={mode.id}
               onClick={() => !isLocked && setMode(mode.id)}
               className={`
-                relative p-6 rounded-lg border-2 transition-all
+                relative p-8 rounded-xl border-2 transition-all h-full
                 ${currentMode === mode.id 
                   ? 'border-blue-500 bg-blue-50' 
                   : 'border-gray-200 hover:border-blue-300'}
                 ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               `}
             >
-              <h3 className="text-xl font-semibold mb-2">{mode.name}</h3>
-              <p className="text-gray-600 text-sm mb-4">{mode.description}</p>
+              <h3 className="text-2xl font-semibold mb-3">{mode.name}</h3>
+              <p className="text-gray-600 text-base mb-6">{mode.description}</p>
               
               {isLocked && (
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="text-sm text-gray-500">
+                <div className="absolute bottom-6 left-8 right-8">
+                  <div className="text-sm text-gray-500 mb-2">
                     Unlock at Level {mode.requiredLevel}
                   </div>
-                  <div className="mt-2 h-2 bg-gray-200 rounded-full">
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-blue-500 rounded-full transition-all"
+                      className="h-full bg-blue-500 transition-all duration-500"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
@@ -63,9 +63,9 @@ const ModeSelector = () => {
               )}
               
               {!isLocked && currentMode === mode.id && (
-                <span className="absolute top-2 right-2">
+                <span className="absolute top-4 right-4">
                   <svg
-                    className="w-6 h-6 text-blue-500"
+                    className="w-8 h-8 text-blue-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
