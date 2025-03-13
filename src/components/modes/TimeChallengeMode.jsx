@@ -98,7 +98,7 @@ const TimeChallengeMode = () => {
   }, [gameState, timePerSquare]);
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold">Time Challenge Mode</h2>
         <div className="flex gap-4">
@@ -140,31 +140,33 @@ const TimeChallengeMode = () => {
             </div>
 
             {/* Chess Board */}
-            <div className="grid grid-cols-8 gap-1 mb-6">
-              {Array.from({ length: 64 }, (_, i) => {
-                const file = String.fromCharCode(97 + (i % 8));
-                const rank = Math.floor(8 - i / 8);
-                const square = `${file}${rank}`;
-                const isDark = (Math.floor(i / 8) + (i % 8)) % 2 === 1;
-                const isSelected = square === selectedSquare;
+            <div className="max-w-[600px] mx-auto mb-6">
+              <div className="grid grid-cols-8 gap-0.5">
+                {Array.from({ length: 64 }, (_, i) => {
+                  const file = String.fromCharCode(97 + (i % 8));
+                  const rank = Math.floor(8 - i / 8);
+                  const square = `${file}${rank}`;
+                  const isDark = (Math.floor(i / 8) + (i % 8)) % 2 === 1;
+                  const isSelected = square === selectedSquare;
 
-                return (
-                  <motion.div
-                    key={square}
-                    whileHover={{ scale: 1.1 }}
-                    className={`
-                      aspect-square flex items-center justify-center text-sm font-medium cursor-pointer
-                      ${isDark ? 'bg-gray-300' : 'bg-gray-100'}
-                      ${isSelected ? 'ring-2 ring-blue-500' : ''}
-                      ${feedback.show && isSelected ? 
-                        (feedback.isCorrect ? 'bg-green-200' : 'bg-red-200') : ''}
-                    `}
-                    onClick={() => handleSquareClick(square)}
-                  >
-                    {square}
-                  </motion.div>
-                );
-              })}
+                  return (
+                    <motion.div
+                      key={square}
+                      whileHover={{ scale: 1.05 }}
+                      className={`
+                        aspect-square flex items-center justify-center text-sm font-medium cursor-pointer
+                        ${isDark ? 'bg-gray-300' : 'bg-gray-100'}
+                        ${isSelected ? 'ring-2 ring-blue-500' : ''}
+                        ${feedback.show && isSelected ? 
+                          (feedback.isCorrect ? 'bg-green-200' : 'bg-red-200') : ''}
+                      `}
+                      onClick={() => handleSquareClick(square)}
+                    >
+                      {square}
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Progress Bar */}

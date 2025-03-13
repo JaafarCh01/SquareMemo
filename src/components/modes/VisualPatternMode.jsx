@@ -44,7 +44,7 @@ const VisualPatternMode = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto">
       <h2 className="text-3xl font-bold mb-6">Visual Pattern Mode</h2>
       
       <div className="bg-white rounded-xl p-6 shadow-lg">
@@ -53,27 +53,29 @@ const VisualPatternMode = () => {
           <p className="text-gray-600 mb-4">{patterns[currentPattern].description}</p>
           
           {/* Chess Board Visualization */}
-          <div className="grid grid-cols-8 gap-1 mb-6">
-            {Array.from({ length: 64 }, (_, i) => {
-              const file = String.fromCharCode(97 + (i % 8)); // a-h
-              const rank = Math.floor(8 - i / 8); // 1-8
-              const square = `${file}${rank}`;
-              const isHighlighted = patterns[currentPattern].squares.includes(square);
-              const isDark = (Math.floor(i / 8) + (i % 8)) % 2 === 1;
+          <div className="max-w-[600px] mx-auto mb-6">
+            <div className="grid grid-cols-8 gap-0.5">
+              {Array.from({ length: 64 }, (_, i) => {
+                const file = String.fromCharCode(97 + (i % 8)); // a-h
+                const rank = Math.floor(8 - i / 8); // 1-8
+                const square = `${file}${rank}`;
+                const isHighlighted = patterns[currentPattern].squares.includes(square);
+                const isDark = (Math.floor(i / 8) + (i % 8)) % 2 === 1;
 
-              return (
-                <motion.div
-                  key={square}
-                  className={`aspect-square flex items-center justify-center text-sm font-medium
-                    ${isDark ? 'bg-gray-300' : 'bg-gray-100'}
-                    ${isHighlighted ? 'ring-2 ring-blue-500 bg-blue-200' : ''}
-                  `}
-                  whileHover={{ scale: 1.1 }}
-                >
-                  {square}
-                </motion.div>
-              );
-            })}
+                return (
+                  <motion.div
+                    key={square}
+                    className={`aspect-square flex items-center justify-center text-sm font-medium
+                      ${isDark ? 'bg-gray-300' : 'bg-gray-100'}
+                      ${isHighlighted ? 'ring-2 ring-blue-500 bg-blue-200' : ''}
+                    `}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {square}
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Tip Section */}
