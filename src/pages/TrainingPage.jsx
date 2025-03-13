@@ -1,6 +1,10 @@
 import React from 'react';
 import { Chessboard } from 'react-chessboard';
 import { useTrainingSession } from '../hooks/useTrainingSession';
+import LevelSystem from '../components/LevelSystem';
+import VisualPatternMode from '../components/modes/VisualPatternMode';
+import InteractiveQuizMode from '../components/modes/InteractiveQuizMode';
+import TimeChallengeMode from '../components/modes/TimeChallengeMode';
 
 export default function TrainingPage() {
   const {
@@ -25,6 +29,7 @@ export default function TrainingPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <LevelSystem />
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold mb-4">Chess Square Trainer</h1>
