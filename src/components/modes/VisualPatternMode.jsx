@@ -44,58 +44,58 @@ const VisualPatternMode = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6">Visual Pattern Mode</h2>
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold">Visual Pattern Mode</h2>
       
-      <div className="bg-white rounded-xl p-6 shadow-lg">
-        <div className="mb-6">
+      <div className="bg-white rounded-xl p-6 shadow-lg space-y-6">
+        <div>
           <h3 className="text-2xl font-semibold mb-3">{patterns[currentPattern].title}</h3>
-          <p className="text-gray-600 mb-4">{patterns[currentPattern].description}</p>
-          
-          {/* Chess Board Visualization */}
-          <div className="max-w-[600px] mx-auto mb-6">
-            <div className="grid grid-cols-8 gap-0.5">
-              {Array.from({ length: 64 }, (_, i) => {
-                const file = String.fromCharCode(97 + (i % 8)); // a-h
-                const rank = Math.floor(8 - i / 8); // 1-8
-                const square = `${file}${rank}`;
-                const isHighlighted = patterns[currentPattern].squares.includes(square);
-                const isDark = (Math.floor(i / 8) + (i % 8)) % 2 === 1;
+          <p className="text-gray-600">{patterns[currentPattern].description}</p>
+        </div>
+        
+        {/* Chess Board Visualization */}
+        <div className="max-w-[480px] mx-auto">
+          <div className="grid grid-cols-8 gap-0.5 aspect-square">
+            {Array.from({ length: 64 }, (_, i) => {
+              const file = String.fromCharCode(97 + (i % 8)); // a-h
+              const rank = 8 - Math.floor(i / 8); // Changed to correctly calculate ranks 1-8
+              const square = `${file}${rank}`;
+              const isHighlighted = patterns[currentPattern].squares.includes(square);
+              const isDark = (Math.floor(i / 8) + (i % 8)) % 2 === 1;
 
-                return (
-                  <motion.div
-                    key={square}
-                    className={`aspect-square flex items-center justify-center text-sm font-medium
-                      ${isDark ? 'bg-gray-300' : 'bg-gray-100'}
-                      ${isHighlighted ? 'ring-2 ring-blue-500 bg-blue-200' : ''}
-                    `}
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    {square}
-                  </motion.div>
-                );
-              })}
-            </div>
+              return (
+                <motion.div
+                  key={square}
+                  className={`flex items-center justify-center text-sm font-medium
+                    ${isDark ? 'bg-gray-300' : 'bg-gray-100'}
+                    ${isHighlighted ? 'ring-2 ring-blue-500 bg-blue-200' : ''}
+                  `}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  {square}
+                </motion.div>
+              );
+            })}
           </div>
-
-          {/* Tip Section */}
-          <motion.button
-            className="w-full py-3 px-4 bg-yellow-100 rounded-lg text-left"
-            onClick={toggleTip}
-            animate={{ height: showTip ? 'auto' : '48px' }}
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">💡 Learning Tip</span>
-              <span>{showTip ? '▼' : '▶'}</span>
-            </div>
-            {showTip && (
-              <p className="mt-2 text-gray-600">{patterns[currentPattern].tip}</p>
-            )}
-          </motion.button>
         </div>
 
+        {/* Tip Section */}
+        <motion.button
+          className="w-full py-3 px-4 bg-yellow-100 rounded-lg text-left"
+          onClick={toggleTip}
+          animate={{ height: showTip ? 'auto' : '48px' }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="font-semibold">💡 Learning Tip</span>
+            <span>{showTip ? '▼' : '▶'}</span>
+          </div>
+          {showTip && (
+            <p className="mt-2 text-gray-600">{patterns[currentPattern].tip}</p>
+          )}
+        </motion.button>
+
         {/* Navigation Buttons */}
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-between pt-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

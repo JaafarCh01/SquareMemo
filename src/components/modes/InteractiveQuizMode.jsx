@@ -33,129 +33,99 @@ const generateQuestions = () => {
 };
 
 const InteractiveQuizMode = () => {
-  const [questions] = useState(generateQuestions);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedSquares, setSelectedSquares] = useState([]);
-  const [feedback, setFeedback] = useState({ show: false, isCorrect: false });
+  const [targetSquare, setTargetSquare] = useState('');
   const [score, setScore] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [feedbackType, setFeedbackType] = useState('');
 
-  const currentQuestion = questions[currentQuestionIndex];
+  useEffect(() => {
+    generateNewTarget();
+  }, []);
+
+  const generateNewTarget = () => {
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8'];
+    const randomFile = files[Math.floor(Math.random() * files.length)];
+    const randomRank = ranks[Math.floor(Math.random() * ranks.length)];
+    setTargetSquare(randomFile + randomRank);
+    setFeedback('');
+    setFeedbackType('');
+  };
 
   const handleSquareClick = (square) => {
-    if (feedback.show) return;
-
-    if (currentQuestion.type === questionTypes.ADJACENT_SQUARES) {
-      setSelectedSquares((prev) => 
-        prev.includes(square) 
-          ? prev.filter(s => s !== square)
-          : [...prev, square]
-      );
+    if (square === targetSquare) {
+      setScore(score + 1);
+      setFeedback('Correct! Well done!');
+      setFeedbackType('success');
+      setTimeout(generateNewTarget, 1000);
     } else {
-      setSelectedSquares([square]);
-      checkAnswer(square);
-    }
-  };
-
-  const checkAnswer = (answer = selectedSquares) => {
-    let isCorrect = false;
-
-    if (currentQuestion.type === questionTypes.ADJACENT_SQUARES) {
-      const selectedSet = new Set(answer);
-      const correctSet = new Set(currentQuestion.correctAnswer);
-      isCorrect = selectedSet.size === correctSet.size && 
-        [...selectedSet].every(square => correctSet.has(square));
-    } else {
-      isCorrect = answer === currentQuestion.correctAnswer;
-    }
-
-    setFeedback({ show: true, isCorrect });
-    if (isCorrect) setScore(score + 1);
-
-    setTimeout(() => {
-      setFeedback({ show: false, isCorrect: false });
-      setSelectedSquares([]);
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
-      }
-    }, 1500);
-  };
-
-  const handleSubmit = () => {
-    if (currentQuestion.type === questionTypes.ADJACENT_SQUARES) {
-      checkAnswer(selectedSquares);
+      setFeedback('Try again!');
+      setFeedbackType('error');
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">Interactive Quiz Mode</h2>
-        <div className="text-xl font-semibold">
-          Score: {score}/{questions.length}
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold">Interactive Quiz Mode</h2>
+      
+      <div className="bg-white rounded-xl p-6 shadow-lg space-y-6">
+        <div>
+          <h3 className="text-2xl font-semibold mb-3">Find the Square</h3>
+          <p className="text-gray-600">Click on square: <span className="font-bold">{targetSquare}</span></p>
         </div>
-      </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-lg">
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-4">{currentQuestion.question}</h3>
+        {/* Score Display */}
+        <div className="text-lg font-semibold">
+          Score: {score}
+        </div>
 
-          {/* Chess Board */}
-          <div className="max-w-[600px] mx-auto mb-6">
-            <div className="grid grid-cols-8 gap-0.5">
-              {Array.from({ length: 64 }, (_, i) => {
-                const file = String.fromCharCode(97 + (i % 8));
-                const rank = Math.floor(8 - i / 8);
-                const square = `${file}${rank}`;
-                const isDark = (Math.floor(i / 8) + (i % 8)) % 2 === 1;
-                const isSelected = selectedSquares.includes(square);
-                const isTarget = currentQuestion.type === questionTypes.NAME_SQUARE && 
-                               square === currentQuestion.targetSquare;
-
-                return (
-                  <motion.div
-                    key={square}
-                    whileHover={{ scale: 1.05 }}
-                    className={`
-                      aspect-square flex items-center justify-center text-sm font-medium cursor-pointer
-                      ${isDark ? 'bg-gray-300' : 'bg-gray-100'}
-                      ${isSelected ? 'ring-2 ring-blue-500 bg-blue-200' : ''}
-                      ${isTarget ? 'ring-2 ring-yellow-500 bg-yellow-200' : ''}
-                      ${feedback.show && isSelected ? 
-                        (feedback.isCorrect ? 'bg-green-200' : 'bg-red-200') : ''}
-                    `}
-                    onClick={() => handleSquareClick(square)}
-                  >
-                    {square}
-                  </motion.div>
-                );
-              })}
-            </div>
+        {/* Feedback Message */}
+        {feedback && (
+          <div className={`text-lg font-medium ${
+            feedbackType === 'success' ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {feedback}
           </div>
+        )}
 
-          {/* Feedback Message */}
-          {feedback.show && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`text-center p-4 rounded-lg mb-4 ${
-                feedback.isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}
-            >
-              {feedback.isCorrect ? 'Correct! 🎉' : 'Try again! 💪'}
-            </motion.div>
-          )}
+        {/* Chess Board */}
+        <div className="max-w-[480px] mx-auto">
+          <div className="grid grid-cols-8 gap-0.5 aspect-square">
+            {Array.from({ length: 64 }, (_, i) => {
+              const file = String.fromCharCode(97 + (i % 8));
+              const rank = 8 - Math.floor(i / 8);
+              const square = `${file}${rank}`;
+              const isDark = (Math.floor(i / 8) + (i % 8)) % 2 === 1;
 
-          {/* Submit Button for Adjacent Squares Question */}
-          {currentQuestion.type === questionTypes.ADJACENT_SQUARES && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full py-3 px-4 bg-blue-500 text-white rounded-lg mt-4"
-              onClick={handleSubmit}
-            >
-              Submit Answer
-            </motion.button>
-          )}
+              return (
+                <motion.div
+                  key={square}
+                  className={`flex items-center justify-center text-sm font-medium cursor-pointer
+                    ${isDark ? 'bg-gray-300' : 'bg-gray-100'}
+                  `}
+                  whileHover={{ scale: 1.05 }}
+                  onClick={() => handleSquareClick(square)}
+                >
+                  {square}
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* New Game Button */}
+        <div className="flex justify-center">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg"
+            onClick={() => {
+              setScore(0);
+              generateNewTarget();
+            }}
+          >
+            New Game
+          </motion.button>
         </div>
       </div>
     </div>
